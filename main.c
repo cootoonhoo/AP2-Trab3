@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+char letras[52] = {'A', 'a', 'B', 'b', 'C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'H', 'h', 'I', 'i', 'J', 'j', 'K', 'k', 'L', 'l', 'M', 'm', 'N', 'n', 'O', 'o', 'P', 'p', 'Q', 'q', 'R', 'r', 'S', 's', 'T', 't', 'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x', 'Y', 'y', 'Z', 'z'};
+
+void Erro(char msg[])
+{
+    system("cls");
+    system("color 4F");
+    printf("%s", msg);
+    system("pause");
+}
+
 char ** GerarMatriz()
 {
     char ** Matriz = (char **)malloc(52 * sizeof(char *));
@@ -37,7 +47,6 @@ char * AjustarTamanhoString(char * string)
 }
 
 void PreencherTabela(char **matriz) {
-    char letras[52] = {'A', 'a', 'B', 'b', 'C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'H', 'h', 'I', 'i', 'J', 'j', 'K', 'k', 'L', 'l', 'M', 'm', 'N', 'n', 'O', 'o', 'P', 'p', 'Q', 'q', 'R', 'r', 'S', 's', 'T', 't', 'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x', 'Y', 'y', 'Z', 'z'};
     int ContadorLetras = 0;
     for(int i = 0; i < 52; i++)
     {
@@ -52,20 +61,58 @@ void PreencherTabela(char **matriz) {
     }
 }
 
-
-
-void Erro(char msg[])
+int EncontrarPosicaoLetras(char letra)
 {
-    system("cls");
-    system("color 4F");
-    printf("%s", msg);
-    system("pause");
+    for(int i = 0; i < 52; i++)
+        if(letra == letras[i]) return i;
+    return -1;
+}
+
+char CriptografarCaractere(char cAberto, char cPalavraChave, char ** TabulaRasa)
+{
+    int posAberto = EncontrarPosicaoLetras(cAberto);
+    int posChave = EncontrarPosicaoLetras(cPalavraChave);
+    if(posAberto == -1 || posChave == -1) return NULL;
+
+    return TabulaRasa[posChave][posAberto];
+}
+
+char * CriptografarMensagem(char * mensagemAberta, char * palavraChave, char ** TabulaRasa)
+{
+    int tamMsgAberta = stringLength(mensagemAberta);
+    int tamPalavraChave = stringLength(palavraChave);
+    char * stringCriptografada = (char *)malloc(tamMsgAberta * sizeof(char));
+    char caractere;
+    int i = 0, j = 0, countCaracteres = 0;
+
+    while(i < tamMsgAberta)
+    {
+        if(j == tamPalavraChave) j = 0;
+        if(mensagemAberta[i] == ' ')
+        {
+            i++;
+            continue;
+        }
+        caractere = CriptografarCaractere(mensagemAberta[i],palavraChave[j],TabulaRasa);
+        if(caractere == NULL)
+        {
+            Erro("Caractere retornou nulo!\n");
+            exit(-1);
+        }
+        stringCriptografada[countCaracteres] = caractere;
+        j++;
+        i++;
+        countCaracteres++;
+    }
+    stringCriptografada[countCaracteres] = '\0';
+    return stringCriptografada;
 }
 
 int main() {
     char **TabulaRasa = NULL;
     char * MsgAberta;
     char * PalavraChave;
+    char * MsgCriptografada;
 
     TabulaRasa = GerarMatriz();
     if(TabulaRasa == NULL)
@@ -90,49 +137,25 @@ int main() {
 
     PreencherTabela(TabulaRasa);
 
+    system("cls");
+    printf("--- Tabula Rasa --- \n\n");
     printf("Digite a mensagem aberta:\n");
     fgets(MsgAberta , 500, stdin);
     fflush(stdin);
     AjustarTamanhoString(MsgAberta);
 
+    system("cls");
+    printf("--- Tabula Rasa --- \n\n");
     printf("Digite a palavra chave:\n");
     fgets(PalavraChave , 500, stdin);
     fflush(stdin);
     AjustarTamanhoString(PalavraChave);
 
+    MsgCriptografada = CriptografarMensagem(MsgAberta, PalavraChave, TabulaRasa);
 
-
-    // for (int i = 0; i < 52; i++) {
-    //     for (int j = 0; j < 52; j++) {
-    //         printf("%c ", TabulaRasa[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-    
-
-    /*Fiz as criações dos vetores e matrizes para pegarmos os caracteres
-    Estou pensando em fazer assim
-    
-    Por exemplo se a entrada da pessoa for "Cada Canto" e "Aventura" tem que organizar esse espaço para codificar
-    
-    Cada Canto
-    Aven turaA
-    
-    ai temos para a primeira letra o C e o A, nisso ele vai no vetor e pega a posição de C e depois de A
-    
-    a posição de C é [4] e de A é [0]
-    
-    Ai ele vai la na matriz e pega a letra na posição [4][0] que neste caso é C
-    
-    ai na segunda, letra "a" e "v" , nisso ele vai no vetor e pega a posição de a e depois de v
-    
-    a posição de "a" é [1] e de v é [43]
-    
-    Ai ele vai la na matriz e pega a letra na posição [1][43] que neste caso é W
-    
-    e assim por diante ate acabar toda a String e depois imprime a codificada
-    */
-    
-    
+    system("cls");
+    printf("--- Tabula Rasa --- \n\n");
+    printf("Mensagem Criptografada :\n");
+    printf("%s\n", MsgCriptografada);
     return 0;
 }
