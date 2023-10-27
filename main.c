@@ -1,62 +1,113 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void preencherMatriz(char ***matriz) {
-    char letras[52] = {'A', 'a', 'B', 'b', 'C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'H', 'h', 'I', 'i', 'J', 'j', 'K', 'k', 'L', 'l', 'M', 'm', 'N', 'n', 'O', 'o', 'P', 'p', 'Q', 'q', 'R', 'r', 'S', 's', 'T', 't', 'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x', 'Y', 'y', 'Z', 'z'};
-
-    *matriz = malloc(52 * sizeof(char *));
-    for (int i = 0; i < 52; i++) {
-        (*matriz)[i] = malloc(52 * sizeof(char));
+char ** GerarMatriz()
+{
+    char ** Matriz = (char **)malloc(52 * sizeof(char *));
+    if(Matriz == NULL) return NULL;
+    for(int i = 0; i < 52; i++)
+    {
+        Matriz[i] = (char *)malloc(52 * sizeof(char));
+        if(Matriz[i] == NULL) return NULL;
     }
+    return Matriz;
+}
 
-    for (int i = 0; i < 52; i++) {
-        for (int j = 0; j < 52; j++) {
-            (*matriz)[i][j] = letras[(i + j) % 52];
+char * GerarString()
+{
+    char * string;
+    string = (char *)malloc(500 * sizeof(char));
+    if(string == NULL) return NULL;
+    return string;
+}
+
+int stringLength(char * string)
+{
+    if(string[0] == '\0' ||  string[0] == '\n') return 0;
+    return 1 + stringLength(string+1);
+}
+
+char * AjustarTamanhoString(char * string)
+{
+    int tam = stringLength(string);
+    string = (char *)realloc(string, (tam + 1)*sizeof(char));
+    
+    string[tam] = '\0';
+    return string;
+}
+
+void PreencherTabela(char **matriz) {
+    char letras[52] = {'A', 'a', 'B', 'b', 'C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'H', 'h', 'I', 'i', 'J', 'j', 'K', 'k', 'L', 'l', 'M', 'm', 'N', 'n', 'O', 'o', 'P', 'p', 'Q', 'q', 'R', 'r', 'S', 's', 'T', 't', 'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x', 'Y', 'y', 'Z', 'z'};
+    int ContadorLetras = 0;
+    for(int i = 0; i < 52; i++)
+    {
+        ContadorLetras = i;
+        for(int j = 0; j < 52; j++)
+        {
+            if(ContadorLetras == 52)
+                ContadorLetras = 0;
+            matriz[i][j] = letras[ContadorLetras];
+            ContadorLetras++;
         }
     }
 }
 
-void preencherVetor(char **vet) {
-    char letras[52] = {'A', 'a', 'B', 'b', 'C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'H', 'h', 'I', 'i', 'J', 'j', 'K', 'k', 'L', 'l', 'M', 'm', 'N', 'n', 'O', 'o', 'P', 'p', 'Q', 'q', 'R', 'r', 'S', 's', 'T', 't', 'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x', 'Y', 'y', 'Z', 'z'};
 
-    *vet = malloc(52 * sizeof(char));
 
-    for (int i = 0; i < 52; i++) {
-        (*vet)[i] = letras[i];
-    }
-}
-
-void limpaMemoria(char **vet, char ***matriz) {
-    for (int i = 0; i < 52; i++) {
-        free((*matriz)[i]);
-    }
-    free(*matriz);
-    free(*vet);
-
-    // Defina os ponteiros para NULL após liberar a memória
-    *matriz = NULL;
-    *vet = NULL;
+void Erro(char msg[])
+{
+    system("cls");
+    system("color 4F");
+    printf("%s", msg);
+    system("pause");
 }
 
 int main() {
-    char **matriz = NULL;
-    char *vet = NULL;
+    char **TabulaRasa = NULL;
+    char * MsgAberta;
+    char * PalavraChave;
 
-    preencherMatriz(&matriz);
-    preencherVetor(&vet);
-
-    for (int i = 0; i < 52; i++) {
-        printf("%c ", vet[i]);
+    TabulaRasa = GerarMatriz();
+    if(TabulaRasa == NULL)
+    {
+        Erro("Nao foi possivel alocar a matriz!\n");
+        exit(-1);
     }
-    printf("\n\n");
 
-    for (int i = 0; i < 52; i++) {
-        for (int j = 0; j < 52; j++) {
-            printf("%c ", matriz[i][j]);
-        }
-        printf("\n");
+    MsgAberta = GerarString();
+    if(MsgAberta == NULL)
+    {
+        Erro("Nao foi possivel alocar a MsgAberta!\n");
+        exit(-1);
     }
-    limpaMemoria(&vet, &matriz);
+
+    PalavraChave = GerarString();
+    if(PalavraChave == NULL)
+    {
+        Erro("Nao foi possivel alocar a PalavraChave!\n");
+        exit(-1);
+    }
+
+    PreencherTabela(TabulaRasa);
+
+    printf("Digite a mensagem aberta:\n");
+    fgets(MsgAberta , 500, stdin);
+    fflush(stdin);
+    AjustarTamanhoString(MsgAberta);
+
+    printf("Digite a palavra chave:\n");
+    fgets(PalavraChave , 500, stdin);
+    fflush(stdin);
+    AjustarTamanhoString(PalavraChave);
+
+
+
+    // for (int i = 0; i < 52; i++) {
+    //     for (int j = 0; j < 52; j++) {
+    //         printf("%c ", TabulaRasa[i][j]);
+    //     }
+    //     printf("\n");
+    // }
     
 
     /*Fiz as criações dos vetores e matrizes para pegarmos os caracteres
